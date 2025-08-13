@@ -1,114 +1,110 @@
 import streamlit as st
 
-st.set_page_config(page_title="운동 종목 추천", page_icon="🏋️", layout="wide")
-
-st.title("🏋️ 운동 능력 기반 맞춤 종목 추천")
-st.write("당신의 체력, 기술, 성향을 바탕으로 어울리는 운동 종목을 추천해드립니다.")
-
-# ---------------------------
-# 1. 질문 섹션
-# ---------------------------
-st.header("📋 자기 진단 질문")
-
-체력 = st.slider("당신의 전반적인 체력 수준은 어느 정도입니까? (1=매우 낮음, 10=매우 높음)", 1, 10, 5)
-지구력 = st.slider("오래 버티는 지구력은 어느 정도입니까?", 1, 10, 5)
-민첩성 = st.slider("순발력과 민첩성은 어느 정도입니까?", 1, 10, 5)
-협응력 = st.slider("눈과 손, 몸의 협응력은 어느 정도입니까?", 1, 10, 5)
-팀플레이 = st.selectbox("개인 운동과 단체 운동 중 어느 것을 선호합니까?", ["개인", "단체", "둘 다 상관없음"])
-실내외 = st.selectbox("실내 운동과 실외 운동 중 어느 것을 선호합니까?", ["실내", "실외", "둘 다 상관없음"])
-목표 = st.selectbox("운동 목적은 무엇입니까?", ["건강 유지", "체중 감량", "근육 증가", "취미/재미", "경쟁/대회"])
-
-# ---------------------------
-# 2. 운동 종목 데이터
-# ---------------------------
-운동_데이터 = [
-    {
-        "이름": "수영",
-        "난이도": "중",
-        "설명": "전신 근육을 사용하는 유산소 및 근력 운동. 관절에 부담이 적고 체력, 지구력 향상에 좋음.",
-        "이미지": "https://upload.wikimedia.org/wikipedia/commons/5/5e/Swimming.jpg",
-        "조건": lambda c,t,a,h,tm,io,goal: c>=4 and t>=4 and io in ["실내", "둘 다 상관없음"]
+# 운동 데이터 (이름: {난이도, 설명, 이미지URL})
+sports_data = {
+    "수영": {
+        "difficulty": 3,
+        "description": "전신 근육을 사용하는 유산소 운동으로, 관절에 부담이 적습니다.",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/3/3a/Swimming_competition.jpg"
     },
-    {
-        "이름": "마라톤",
-        "난이도": "상",
-        "설명": "장거리 달리기. 강한 지구력과 꾸준한 훈련이 필요하며, 체중 감량과 심폐지구력 향상에 효과적.",
-        "이미지": "https://upload.wikimedia.org/wikipedia/commons/0/09/Marathon_in_Tokyo.jpg",
-        "조건": lambda c,t,a,h,tm,io,goal: t>=7 and io in ["실외", "둘 다 상관없음"]
+    "마라톤": {
+        "difficulty": 5,
+        "description": "지구력과 정신력을 극한까지 끌어올리는 장거리 달리기 운동입니다.",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/5/54/Marathon_in_São_Paulo.jpg"
     },
-    {
-        "이름": "요가",
-        "난이도": "하",
-        "설명": "유연성과 균형감 향상, 스트레스 완화에 탁월. 남녀노소 모두 가능.",
-        "이미지": "https://upload.wikimedia.org/wikipedia/commons/f/f7/Yoga_Pose.jpg",
-        "조건": lambda c,t,a,h,tm,io,goal: io in ["실내", "둘 다 상관없음"]
+    "탁구": {
+        "difficulty": 2,
+        "description": "빠른 반사신경과 집중력을 키울 수 있는 실내 라켓 스포츠입니다.",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/5/5a/Table_tennis_game.jpg"
     },
-    {
-        "이름": "축구",
-        "난이도": "중",
-        "설명": "순발력, 민첩성, 팀워크가 중요한 대표적인 단체 스포츠.",
-        "이미지": "https://upload.wikimedia.org/wikipedia/commons/6/6e/Soccer_game.jpg",
-        "조건": lambda c,t,a,h,tm,io,goal: a>=5 and tm in ["단체", "둘 다 상관없음"]
+    "배드민턴": {
+        "difficulty": 3,
+        "description": "민첩성과 순발력을 기르며 즐길 수 있는 인기 라켓 스포츠입니다.",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/4/4d/Badminton_game.jpg"
     },
-    {
-        "이름": "클라이밍",
-        "난이도": "상",
-        "설명": "상체 근력, 하체 힘, 집중력과 도전 정신이 필요한 스포츠.",
-        "이미지": "https://upload.wikimedia.org/wikipedia/commons/8/8a/Indoor_Climbing.jpg",
-        "조건": lambda c,t,a,h,tm,io,goal: c>=6 and h>=5
+    "축구": {
+        "difficulty": 4,
+        "description": "팀워크와 체력을 동시에 요구하는 인기 구기 종목입니다.",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/d/d3/Football_in_Brazil.jpg"
     },
-    {
-        "이름": "탁구",
-        "난이도": "중",
-        "설명": "빠른 반사신경과 손-눈 협응력, 집중력이 필요한 실내 스포츠.",
-        "이미지": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Table_tennis_paddles.jpg",
-        "조건": lambda c,t,a,h,tm,io,goal: h>=6 and io in ["실내", "둘 다 상관없음"]
+    "농구": {
+        "difficulty": 4,
+        "description": "점프력과 순발력, 협동심을 키우는 대표적인 실내외 구기 운동입니다.",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball_game.jpg"
     },
-    {
-        "이름": "등산",
-        "난이도": "중",
-        "설명": "자연 속에서 심폐지구력과 하체 근력을 동시에 기를 수 있는 운동.",
-        "이미지": "https://upload.wikimedia.org/wikipedia/commons/3/3a/Hiking_in_Korea.jpg",
-        "조건": lambda c,t,a,h,tm,io,goal: t>=5 and io in ["실외", "둘 다 상관없음"]
+    "등산": {
+        "difficulty": 3,
+        "description": "자연 속에서 심폐지구력을 기르며 스트레스를 해소할 수 있는 운동입니다.",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/f/f8/Hiking_in_the_mountains.jpg"
     },
-    {
-        "이름": "복싱",
-        "난이도": "상",
-        "설명": "전신 근육 강화, 순발력, 체력, 집중력 향상에 좋은 격투 스포츠.",
-        "이미지": "https://upload.wikimedia.org/wikipedia/commons/6/6b/Boxing_in_progress.jpg",
-        "조건": lambda c,t,a,h,tm,io,goal: c>=6 and a>=6
+    "요가": {
+        "difficulty": 2,
+        "description": "유연성과 균형감을 향상시키며 정신적 안정에도 도움을 줍니다.",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/9/9d/Yoga_Class.jpg"
     },
-    {
-        "이름": "배드민턴",
-        "난이도": "중",
-        "설명": "빠른 스텝과 순발력, 민첩성이 요구되는 라켓 스포츠.",
-        "이미지": "https://upload.wikimedia.org/wikipedia/commons/d/d1/Badminton_rally.jpg",
-        "조건": lambda c,t,a,h,tm,io,goal: a>=5 and io in ["실내", "둘 다 상관없음"]
+    "필라테스": {
+        "difficulty": 3,
+        "description": "코어 근육 강화와 자세 교정에 효과적인 운동입니다.",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/f/fd/Pilates_with_small_ball.jpg"
+    },
+    "스케이트보드": {
+        "difficulty": 4,
+        "description": "균형감과 순발력을 기르며 창의적인 기술을 즐길 수 있는 익스트림 스포츠입니다.",
+        "image": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Skateboard_trick.jpg"
     }
-]
+}
 
-# ---------------------------
-# 3. 추천 로직
-# ---------------------------
-추천_종목 = []
-for 운동 in 운동_데이터:
-    if 운동["조건"](체력, 지구력, 민첩성, 협응력, 팀플레이, 실내외, 목표):
-        추천_종목.append(운동)
+st.title("🏋️ 운동 능력 기반 종목 추천 웹앱")
 
-# ---------------------------
-# 4. 결과 출력
-# ---------------------------
-st.header("🏆 추천 운동 종목")
+st.write("아래 질문에 답하면 당신에게 맞는 운동 종목을 추천해드립니다!")
 
-if 추천_종목:
-    for 운동 in 추천_종목:
-        with st.container():
-            col1, col2 = st.columns([1, 2])
-            with col1:
-                st.image(운동["이미지"], use_container_width=True)
-            with col2:
-                st.subheader(f"{운동['이름']} ({운동['난이도']})")
-                st.write(운동["설명"])
-            st.markdown("---")
-else:
-    st.warning("조건에 맞는 운동 종목이 없습니다. 입력 값을 조정해 보세요!")
+# 사용자 입력 질문
+st.subheader("1. 체력 수준")
+stamina = st.slider("체력을 1~5로 평가하세요 (1: 낮음, 5: 매우 높음)", 1, 5, 3)
+
+st.subheader("2. 기술 수준")
+skill = st.slider("운동 기술 수준을 1~5로 평가하세요 (1: 초보, 5: 전문가)", 1, 5, 3)
+
+st.subheader("3. 선호하는 환경")
+environment = st.radio("어떤 환경에서 운동하길 좋아하나요?", ["실내", "실외", "상관없음"])
+
+st.subheader("4. 선호하는 운동 강도")
+intensity = st.radio("운동 강도를 어떻게 선호하나요?", ["낮음", "중간", "높음"])
+
+# 추천 로직
+if st.button("추천 받기"):
+    recommendations = []
+
+    for sport, info in sports_data.items():
+        score = 0
+
+        # 난이도와 체력 수준이 비슷하면 점수 부여
+        score -= abs(info["difficulty"] - stamina)
+
+        # 강도 매칭
+        if intensity == "높음" and info["difficulty"] >= 4:
+            score += 2
+        elif intensity == "중간" and 2 <= info["difficulty"] <= 4:
+            score += 2
+        elif intensity == "낮음" and info["difficulty"] <= 2:
+            score += 2
+
+        # 환경 매칭 (실내/실외)
+        if environment == "실내" and sport in ["탁구", "배드민턴", "농구", "요가", "필라테스"]:
+            score += 1
+        elif environment == "실외" and sport in ["축구", "등산", "마라톤", "스케이트보드", "수영"]:
+            score += 1
+        elif environment == "상관없음":
+            score += 1
+
+        recommendations.append((score, sport))
+
+    recommendations.sort(reverse=True)  # 점수 순 정렬
+    best_sport = recommendations[0][1]
+    info = sports_data[best_sport]
+
+    # 결과 출력
+    st.success(f"추천 종목: **{best_sport}**")
+    st.image(info["image"], caption=best_sport, use_column_width=True)
+    st.write(f"**난이도:** {info['difficulty']} / 5")
+    st.write(f"**설명:** {info['description']}")
