@@ -1,7 +1,9 @@
 import streamlit as st
 import random
 
+# ======================
 # 운동 데이터
+# ======================
 exercise_data = {
     "유산소 운동": {
         "조깅": {"난이도": "⭐⭐", "설명": "심폐 지구력을 높이는 기본 유산소 운동"},
@@ -32,24 +34,42 @@ exercise_data = {
     }
 }
 
-st.title("🏋️ 맞춤 운동 추천 앱")
+# ======================
+# 제목 & 부제목
+# ======================
+st.markdown("<h1 style='text-align: center; color: #FF4B4B;'>🏋️ 맞춤 운동 추천 앱</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: grey;'>당신의 목표와 라이프스타일에 맞는 운동을 추천해드립니다!</p>", unsafe_allow_html=True)
+st.markdown("---")
 
-st.write("당신의 생활 습관과 목표에 맞는 운동을 추천해드립니다! 아래 질문에 답해주세요 👇")
+# ======================
+# 질문 폼
+# ======================
+with st.form("exercise_form"):
+    st.subheader("💡 운동 정보를 입력해주세요")
+    
+    # 컬럼 배치
+    col1, col2 = st.columns(2)
+    with col1:
+        목표 = st.selectbox("1️⃣ 운동 목적", ["체중 감량", "체력 강화", "근육 증가", "유연성 향상", "스트레스 해소"])
+        운동강도 = st.selectbox("2️⃣ 운동 강도", ["가볍게", "보통", "강하게"])
+        시간 = st.selectbox("3️⃣ 하루 운동 가능 시간", ["30분 이하", "30분~1시간", "1시간 이상"])
+    with col2:
+        실내외 = st.selectbox("4️⃣ 운동 장소", ["실내", "실외", "상관없음"])
+        혼자같이 = st.selectbox("5️⃣ 혼자/같이", ["혼자", "같이", "상관없음"])
+        관절부담 = st.selectbox("6️⃣ 관절 부담 고려?", ["네", "아니오"])
+        장비사용 = st.selectbox("7️⃣ 장비 사용 여부", ["장비 필요 없음", "간단한 장비 가능", "헬스장 기구 사용 가능"])
+    
+    submitted = st.form_submit_button("✅ 운동 추천 받기")
 
-# 질문 부분
-목표 = st.selectbox("1. 운동 목적은 무엇인가요?", ["체중 감량", "체력 강화", "근육 증가", "유연성 향상", "스트레스 해소"])
-운동강도 = st.selectbox("2. 원하는 운동 강도는?", ["가볍게", "보통", "강하게"])
-시간 = st.selectbox("3. 하루에 투자할 수 있는 운동 시간은?", ["30분 이하", "30분~1시간", "1시간 이상"])
-실내외 = st.selectbox("4. 선호하는 운동 장소는?", ["실내", "실외", "상관없음"])
-혼자같이 = st.selectbox("5. 혼자 하는 운동과 함께하는 운동 중 무엇을 선호하나요?", ["혼자", "같이", "상관없음"])
-관절부담 = st.selectbox("6. 무릎, 허리 등에 부담이 적은 운동을 원하시나요?", ["네", "아니오"])
-장비사용 = st.selectbox("7. 운동 시 장비 사용 여부는?", ["장비 필요 없음", "간단한 장비 가능", "헬스장 기구 사용 가능"])
-
-# 확인 버튼
-if st.button("✅ 운동 추천 받기"):
+# ======================
+# 추천 결과 출력
+# ======================
+if submitted:
+    st.subheader("🔥 추천 운동 종목")
+    
     추천운동 = []
-
-    # 조건별 추천 로직 (간단 버전)
+    
+    # 조건별 추천 로직
     if 목표 == "체중 감량":
         추천운동.extend(list(exercise_data["유산소 운동"].keys()))
     elif 목표 == "체력 강화":
@@ -60,15 +80,19 @@ if st.button("✅ 운동 추천 받기"):
         추천운동.extend(list(exercise_data["유연성 & 재활"].keys()))
     elif 목표 == "스트레스 해소":
         추천운동.extend(list(exercise_data["스포츠"].keys()) + ["요가", "필라테스"])
-
+    
     # 2~3개 랜덤 추천
     추천리스트 = random.sample(추천운동, min(3, len(추천운동)))
-
-    st.subheader("🔥 추천 운동 종목")
+    
+    # 카드 스타일로 출력
     for 운동 in 추천리스트:
         for 카테고리, 운동들 in exercise_data.items():
             if 운동 in 운동들:
-                st.write(f"### {운동} ({카테고리})")
-                st.write(f"난이도: {운동들[운동]['난이도']}")
-                st.write(f"설명: {운동들[운동]['설명']}")
-                st.markdown("---")
+                info = 운동들[운동]
+                st.markdown(f"""
+                <div style='background-color: #F0F8FF; padding: 15px; border-radius: 10px; margin-bottom: 10px;'>
+                    <h3 style='color: #FF4B4B;'>{운동} ({카테고리})</h3>
+                    <p>난이도: {info['난이도']}</p>
+                    <p>설명: {info['설명']}</p>
+                </div>
+                """, unsafe_allow_html=True)
