@@ -1,2 +1,2 @@
 import streamlit as st
-st.title('집 갈래')
+st.title('생일^0^')
