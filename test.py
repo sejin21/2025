@@ -37,7 +37,7 @@ exercise_data = {
 # ======================
 # 제목 & 부제목
 # ======================
-st.markdown("<h1 style='text-align: center; color: #FF4B4B;'>🏋️ 맞춤 운동 추천 앱</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: #FF4B4B;'>💪 나만의 운동 코치</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: grey;'>당신의 목표와 라이프스타일에 맞는 운동을 추천해드립니다!</p>", unsafe_allow_html=True)
 st.markdown("---")
 
